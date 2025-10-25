@@ -16,7 +16,7 @@ export default function SplashScreenComponent({ navigation }) {
       // Callback: se ejecuta después de que termina la animación
       setTimeout(async () => {
         await SplashScreen.hideAsync();
-        navigation.replace('MainTabs');
+        navigation.replace('Login');
       }, 3000); // <-- CAMBIO AQUÍ: Tiempo de espera después de la animación (3 segundos)
     });
   }, []);

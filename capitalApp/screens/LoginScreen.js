@@ -25,7 +25,7 @@ const COLORS = {
 
 export default function LoginScreen({ navigation }) {
   // --- Estados para el formulario ---
-  const [username, setUsername] = useState('karen143004');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true); // Marcado por defecto en la imagen
@@ -45,7 +45,7 @@ export default function LoginScreen({ navigation }) {
           <View style={styles.logoContainer}>
             <Image
               // Logo de Capital One (similar al de la imagen)
-              source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Capital_One_logo.svg/1280px-Capital_One_logo.svg.png' }}
+              source={require('../assets/splash-one.png')}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -58,6 +58,8 @@ export default function LoginScreen({ navigation }) {
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
+                placeholder="Usuario"
+                placeholderTextColor={COLORS.lightText}
                 value={username}
                 onChangeText={setUsername}
                 autoCapitalize="none"
