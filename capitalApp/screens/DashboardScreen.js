@@ -124,33 +124,6 @@ const CreditCard = () => (
   </TouchableOpacity>
 );
 
-// --- 7. Barra de Pestañas Inferior ---
-const BottomTabBar = () => (
-  <View style={styles.tabBarContainer}>
-    <TouchableOpacity style={styles.tabItem}>
-      <Ionicons name="wallet" size={24} color={COLORS.primaryBlue} />
-      <Text style={styles.tabTextActive}>Cuentas</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.tabItem}>
-      <Ionicons name="swap-horizontal" size={24} color={COLORS.lightText} />
-      <Text style={styles.tabText}>Paga y transfiere</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.tabItem}>
-      <Ionicons name="stats-chart" size={24} color={COLORS.lightText} />
-      <Text style={styles.tabText}>Planifica y...</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.tabItem}>
-      <Ionicons name="star" size={24} color={COLORS.lightText} />
-      <Text style={styles.tabText}>Beneficios y...</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.tabItem}>
-      <Feather name="menu" size={24} color={COLORS.lightText} />
-      <Text style={styles.tabText}>Más</Text>
-    </TouchableOpacity>
-  </View>
-);
-
-
 // --- Componente Principal de la Pantalla ---
 export default function DashboardScreen() {
   return (
@@ -159,7 +132,11 @@ export default function DashboardScreen() {
       <AppHeader />
       
       {/* El ScrollView permite que el contenido del medio sea deslizable */}
-      <ScrollView style={styles.container}>
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         <NotificationBanner />
         <SearchAndChat />
         <QuickActions />
@@ -175,12 +152,9 @@ export default function DashboardScreen() {
         <AccountCard />
         <CreditCard />
 
-        {/* Agregamos otra tarjeta para demostrar el scroll */}
-        <CreditCard />
-
+        {/* Espacio adicional para evitar que el último elemento quede bajo el tab bar */}
+        <View style={{ height: 20 }} />
       </ScrollView>
-
-      <BottomTabBar />
     </SafeAreaView>
   );
 }
@@ -361,30 +335,11 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   paymentText: {
-    flex: 1, // Para que el texto se ajuste si es largo
+    flex: 1,
     color: COLORS.darkText,
     fontSize: 13,
   },
-  // Tab Bar
-  tabBarContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 10,
-    backgroundColor: COLORS.white,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.borderGray,
-  },
-  tabItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  tabText: {
-    fontSize: 10,
-    color: COLORS.lightText,
-  },
-  tabTextActive: {
-    fontSize: 10,
-    color: COLORS.primaryBlue,
-    fontWeight: 'bold',
+  scrollContent: {
+    paddingBottom: 16,
   },
 });

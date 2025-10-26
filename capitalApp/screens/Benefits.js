@@ -1,0 +1,117 @@
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  TouchableOpacity,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+const COLORS = {
+  primaryBlue: '#004a77',
+  lightGrayBg: '#f4f6f9',
+  white: '#ffffff',
+  darkText: '#222222',
+  lightText: '#666666',
+  borderGray: '#e0e0e0',
+};
+
+export default function Benefits() {
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+      
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Beneficios y Recompensas</Text>
+      </View>
+
+      <ScrollView style={styles.container}>
+        <View style={styles.emptyState}>
+          <Ionicons name="star-outline" size={80} color={COLORS.primaryBlue} />
+          <Text style={styles.emptyTitle}>Beneficios próximamente</Text>
+          <Text style={styles.emptySubtitle}>
+            Aquí podrás ver tus puntos, insignias y beneficios activos
+          </Text>
+          
+          <View style={styles.featureList}>
+            <FeatureItem icon="trophy" text="Insignias ganadas" />
+            <FeatureItem icon="gift" text="Beneficios activos" />
+            <FeatureItem icon="flame" text="Puntos acumulados" />
+            <FeatureItem icon="ribbon" text="Recompensas especiales" />
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const FeatureItem = ({ icon, text }) => (
+  <View style={styles.featureItem}>
+    <Ionicons name={icon} size={24} color={COLORS.primaryBlue} />
+    <Text style={styles.featureText}>{text}</Text>
+  </View>
+);
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+  },
+  header: {
+    padding: 16,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderGray,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: COLORS.primaryBlue,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.lightGrayBg,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 32,
+    marginTop: 40,
+  },
+  emptyTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: COLORS.darkText,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    color: COLORS.lightText,
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  featureList: {
+    width: '100%',
+    marginTop: 16,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: COLORS.borderGray,
+  },
+  featureText: {
+    fontSize: 16,
+    color: COLORS.darkText,
+    marginLeft: 16,
+    fontWeight: '500',
+  },
+});
