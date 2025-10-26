@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,9 +8,11 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-  StatusBar
+  StatusBar,
+  Animated   
 } from 'react-native';
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+
 
 // --- Colores de la App ---
 const COLORS = {
@@ -31,9 +33,9 @@ const AppHeader = ({ navigation }) => (
     <TouchableOpacity>
       <Feather name="menu" size={24} color={COLORS.primaryBlue} />
     </TouchableOpacity>
-    {/* Usamos el logo de Capital One como en la imagen */}
+   
     <Image
-      source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Capital_One_logo.svg/1280px-Capital_One_logo.svg.png' }}
+      source={require('../assets/splash-one.png')}
       style={styles.logo}
       resizeMode="contain"
     />
@@ -44,16 +46,43 @@ const AppHeader = ({ navigation }) => (
 );
 
 // --- 2. Banner de Notificación ---
-const NotificationBanner = () => (
-  <TouchableOpacity style={styles.notificationBanner}>
-    <Ionicons name="information-circle" size={20} color={COLORS.white} style={{ marginRight: 10 }} />
-    <View style={{ flex: 1 }}>
-      <Text style={styles.notificationText}>¿Te afectó el cierre del gobierno?</Text>
-      <Text style={styles.notificationSubText}>Quizás podamos ayudar. Ver detalles</Text>
-    </View>
-    <Ionicons name="chevron-forward" size={20} color={COLORS.white} />
-  </TouchableOpacity>
-);
+const NotificationBanner = ({ navigation }) => {
+  const [isVisible, setIsVisible] = useState(true);
+  const fadeAnim = React.useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Animación de fade-out suave
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }).start(() => {
+        setIsVisible(false);
+      });
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!isVisible) return null;
+
+  return (
+    <Animated.View style={{ opacity: fadeAnim }}>
+      <TouchableOpacity 
+        style={styles.notificationBanner}
+        onPress={() => navigation.navigate('NotificationDetails')}
+      >
+        <Ionicons name="information-circle" size={20} color={COLORS.white} style={{ marginRight: 10 }} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.notificationText}>¿Te afectó el cierre del gobierno?</Text>
+          <Text style={styles.notificationSubText}>Quizás podamos ayudar. Ver detalles</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color={COLORS.white} />
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
 
 // --- 3. Barra de Búsqueda y Chat ---
 const SearchAndChat = ({ navigation }) => (
@@ -133,6 +162,9 @@ const CreditCard = ({ navigation }) => (
       </Text>
     </View>
   </TouchableOpacity>
+
+  
+  
 );
 
 // --- Componente Principal de la Pantalla ---
@@ -218,6 +250,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     marginBottom: 16,
+    marginTop: 13,
   },
   searchBar: {
     flex: 1,
@@ -236,22 +269,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginLeft: 12,
   },
-  // Quick Actions
-  quickActionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 24,
-  },
-  actionItem: {
-    alignItems: 'center',
-  },
-  actionText: {
-    color: COLORS.chatBlue,
-    fontWeight: '500',
-    fontSize: 13,
-  },
+
   // Section Header
   sectionHeader: {
     flexDirection: 'row',
