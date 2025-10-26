@@ -2,6 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SplashScreen from '../screens/SplashScreen';
 import LoginScreen from '../screens/LoginScreen';
+import SignUpScreen from '../screens/SignUpScreen';
 import TabNavigator from './TabNavigator';
 
 const Stack = createNativeStackNavigator();
@@ -18,8 +19,8 @@ export default function AppNavigator() {
       {/* Pantalla de inicio de sesión */}
       <Stack.Screen name="Login" component={LoginScreen} />
 
-      {/* Navegación principal (tabs) */}
-      <Stack.Screen name="MainTabs" component={TabNavigator} />
+      {/* Pantalla de registro */}
+      <Stack.Screen name="SignUp" component={SignUpScreen} />
     </Stack.Navigator>
   );
 }

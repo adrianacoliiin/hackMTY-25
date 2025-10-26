@@ -1,16 +1,16 @@
 {
   "expo": {
     "name": "",
-    "slug": "capitalApp",
+    "slug": "",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/splash-one.png",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-one.png",
       "resizeMode": "contain",
-      "backgroundColor": "#094b77"
+      "backgroundColor": "#ffffff"
     },
     "ios": { 
       "supportsTablet": true 
@@ -18,10 +18,10 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#094b77"
+        "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "backgroundColor": "#094b77"
+      "backgroundColor": "#ffffff"
     },
     "web": { "favicon": "./assets/favicon.png" }
   }
