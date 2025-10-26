@@ -11,6 +11,7 @@ import {
   Alert,
   ActivityIndicator,
   Animated,
+  TextInput,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { EarnedBadge, ProgressBadge, LockedBadge } from '../components/BadgeCard';
@@ -213,12 +214,240 @@ const BadgeDetailModal = ({ visible, badge, onClose }) => {
   );
 };
 
+// --- 6. Level Details Modal ---
+const LevelDetailsModal = ({ visible, onClose, level, userPoints }) => {
+  if (!level) return null;
+
+  const levels = [
+    { level: 1, name: 'Bronce', color: '#CD7F32', min: 0, max: 999 },
+    { level: 2, name: 'Plata', color: '#C0C0C0', min: 1000, max: 4999 },
+    { level: 3, name: 'Oro', color: '#FFD700', min: 5000, max: 9999 },
+    { level: 4, name: 'Platino', color: '#E5E4E2', min: 10000, max: Infinity },
+  ];
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Sistema de Niveles</Text>
+            <TouchableOpacity onPress={onClose}>
+              <Ionicons name="close" size={28} color={COLORS.darkText} />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+            <Text style={styles.levelModalDescription}>
+              Acumula puntos para desbloquear niveles superiores y obtener beneficios exclusivos
+            </Text>
+
+            {levels.map((lvl, index) => {
+              const isCurrentLevel = level.level === lvl.level;
+              const isUnlocked = userPoints.total_points >= lvl.min;
+              
+              return (
+                <View 
+                  key={lvl.level} 
+                  style={[
+                    styles.levelDetailCard,
+                    isCurrentLevel && styles.levelDetailCardActive
+                  ]}
+                >
+                  <View style={styles.levelDetailHeader}>
+                    <View style={[styles.levelDetailIcon, { backgroundColor: lvl.color + '20' }]}>
+                      <MaterialCommunityIcons 
+                        name="star-circle" 
+                        size={32} 
+                        color={lvl.color} 
+                      />
+                    </View>
+                    <View style={styles.levelDetailInfo}>
+                      <Text style={styles.levelDetailName}>{lvl.name}</Text>
+                      <Text style={styles.levelDetailRange}>
+                        {lvl.min.toLocaleString()} - {lvl.max === Infinity ? '∞' : lvl.max.toLocaleString()} pts
+                      </Text>
+                    </View>
+                    {isCurrentLevel && (
+                      <View style={styles.currentLevelBadge}>
+                        <Text style={styles.currentLevelText}>Actual</Text>
+                      </View>
+                    )}
+                    {!isUnlocked && (
+                      <Ionicons name="lock-closed" size={20} color={COLORS.lightText} />
+                    )}
+                  </View>
+
+                  <View style={styles.levelBenefits}>
+                    <Text style={styles.levelBenefitsTitle}>Beneficios:</Text>
+                    <View style={styles.levelBenefitItem}>
+                      <Ionicons name="checkmark-circle" size={16} color={COLORS.successGreen} />
+                      <Text style={styles.levelBenefitText}>
+                        {lvl.level === 1 && 'Cashback 1% en compras'}
+                        {lvl.level === 2 && 'Cashback 2% + Sin comisiones'}
+                        {lvl.level === 3 && 'Cashback 3% + Tasa preferencial'}
+                        {lvl.level === 4 && 'Cashback 5% + Todos los beneficios'}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              );
+            })}
+          </ScrollView>
+
+          <TouchableOpacity style={styles.modalCloseButton} onPress={onClose}>
+            <Text style={styles.modalCloseButtonText}>Cerrar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+// --- 7. Redeem Points Modal ---
+const RedeemPointsModal = ({ visible, onClose, userPoints, onRedeem }) => {
+  const [selectedReward, setSelectedReward] = useState(null);
+
+  const rewards = [
+    { id: '1', name: 'Cashback $50', points: 500, value: 50, type: 'cashback' },
+    { id: '2', name: 'Cashback $100', points: 900, value: 100, type: 'cashback' },
+    { id: '3', name: 'Descuento 10%', points: 750, value: 10, type: 'discount' },
+    { id: '4', name: 'Sin comisiones 1 mes', points: 600, value: 1, type: 'fee_waiver' },
+  ];
+
+  const handleRedeem = () => {
+    if (!selectedReward) {
+      Alert.alert('Error', 'Selecciona una recompensa');
+      return;
+    }
+    if (userPoints.total_points < selectedReward.points) {
+      Alert.alert('Puntos insuficientes', 'No tienes suficientes puntos para esta recompensa');
+      return;
+    }
+    onRedeem(selectedReward);
+    setSelectedReward(null);
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Canjear Puntos</Text>
+            <TouchableOpacity onPress={onClose}>
+              <Ionicons name="close" size={28} color={COLORS.darkText} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.pointsBalance}>
+            <Text style={styles.pointsBalanceLabel}>Puntos disponibles</Text>
+            <Text style={styles.pointsBalanceValue}>
+              {userPoints.total_points.toLocaleString('es-MX')}
+            </Text>
+          </View>
+
+          <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+            <Text style={styles.rewardsTitle}>Recompensas disponibles</Text>
+            {rewards.map((reward) => {
+              const canAfford = userPoints.total_points >= reward.points;
+              return (
+                <TouchableOpacity
+                  key={reward.id}
+                  style={[
+                    styles.rewardOption,
+                    selectedReward?.id === reward.id && styles.rewardOptionSelected,
+                    !canAfford && styles.rewardOptionDisabled
+                  ]}
+                  onPress={() => canAfford && setSelectedReward(reward)}
+                  disabled={!canAfford}
+                >
+                  <View style={styles.rewardOptionLeft}>
+                    <Ionicons 
+                      name={selectedReward?.id === reward.id ? 'radio-button-on' : 'radio-button-off'} 
+                      size={24} 
+                      color={canAfford ? COLORS.primaryBlue : COLORS.lightText} 
+                    />
+                    <View style={styles.rewardOptionDetails}>
+                      <Text style={[styles.rewardOptionName, !canAfford && { color: COLORS.lightText }]}>
+                        {reward.name}
+                      </Text>
+                      <Text style={styles.rewardOptionPoints}>
+                        {reward.points.toLocaleString('es-MX')} puntos
+                      </Text>
+                    </View>
+                  </View>
+                  {!canAfford && (
+                    <Ionicons name="lock-closed" size={20} color={COLORS.lightText} />
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+
+          <View style={styles.modalFooter}>
+            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+              <Text style={styles.cancelButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.confirmButton, !selectedReward && { opacity: 0.5 }]} 
+              onPress={handleRedeem}
+              disabled={!selectedReward}
+            >
+              <Text style={styles.confirmButtonText}>Canjear</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+// --- 8. Daily Challenges Card ---
+const DailyChallengesCard = ({ challenges, onChallengePress }) => (
+  <View style={styles.challengesCard}>
+    <View style={styles.challengesHeader}>
+      <Text style={styles.challengesTitle}>Retos Diarios</Text>
+      <Ionicons name="flame" size={20} color={COLORS.warningOrange} />
+    </View>
+    {challenges.map((challenge, index) => (
+      <TouchableOpacity 
+        key={index} 
+        style={styles.challengeItem}
+        onPress={() => onChallengePress(challenge)}
+      >
+        <View style={styles.challengeIconContainer}>
+          <MaterialCommunityIcons 
+            name={challenge.icon} 
+            size={20} 
+            color={challenge.completed ? COLORS.successGreen : COLORS.primaryBlue} 
+          />
+        </View>
+        <View style={styles.challengeDetails}>
+          <Text style={styles.challengeName}>{challenge.name}</Text>
+          <Text style={styles.challengeProgress}>
+            {challenge.current}/{challenge.target}
+          </Text>
+        </View>
+        <View style={styles.challengeReward}>
+          <Text style={styles.challengePoints}>+{challenge.points}</Text>
+          {challenge.completed && (
+            <Ionicons name="checkmark-circle" size={20} color={COLORS.successGreen} />
+          )}
+        </View>
+      </TouchableOpacity>
+    ))}
+  </View>
+);
+
 // --- Componente Principal ---
 export default function Benefits() {
   const [activeTab, setActiveTab] = useState('badges');
   const [loading, setLoading] = useState(false);
   const [selectedBadge, setSelectedBadge] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [levelModalVisible, setLevelModalVisible] = useState(false);
+  const [redeemModalVisible, setRedeemModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState('all');
 
   // Mock data - será reemplazado por datos reales de Supabase
   const [userPoints] = useState({
@@ -236,6 +465,36 @@ export default function Benefits() {
     progressToNext: 48.67,
     pointsToNext: 2550,
   });
+
+  const [dailyChallenges] = useState([
+    { 
+      id: '1',
+      name: 'Realiza 3 transacciones',
+      icon: 'swap-horizontal',
+      current: 2,
+      target: 3,
+      points: 50,
+      completed: false
+    },
+    { 
+      id: '2',
+      name: 'Paga una factura',
+      icon: 'receipt',
+      current: 1,
+      target: 1,
+      points: 75,
+      completed: true
+    },
+    { 
+      id: '3',
+      name: 'Ahorra $100',
+      icon: 'piggy-bank',
+      current: 50,
+      target: 100,
+      points: 100,
+      completed: false
+    },
+  ]);
 
   const [earnedBadges] = useState([
     {
@@ -375,19 +634,143 @@ export default function Benefits() {
   };
 
   const handleNotificationPress = () => {
-    Alert.alert('Notificaciones', 'Funcionalidad próximamente');
+    Alert.alert('Notificaciones', 'Tienes 2 nuevas notificaciones:\n\n1. ¡Nuevo badge desbloqueado!\n2. Reto diario completado');
+  };
+
+  const handleRedeemPoints = (reward) => {
+    Alert.alert(
+      '¡Canje exitoso!',
+      `Has canjeado ${reward.points} puntos por ${reward.name}`,
+      [
+        {
+          text: 'OK',
+          onPress: () => {
+            setRedeemModalVisible(false);
+            // Aquí se actualizaría el backend
+          }
+        }
+      ]
+    );
+  };
+
+  const handleShareBadge = (badge) => {
+    Alert.alert(
+      'Compartir logro',
+      `¿Quieres compartir tu badge "${badge.badge_name}" en redes sociales?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Compartir', 
+          onPress: () => Alert.alert('Compartido', '¡Logro compartido exitosamente!') 
+        }
+      ]
+    );
+  };
+
+  const handleChallengePress = (challenge) => {
+    if (challenge.completed) {
+      Alert.alert('¡Reto completado!', `Has ganado ${challenge.points} puntos`);
+    } else {
+      Alert.alert(
+        challenge.name,
+        `Progreso: ${challenge.current}/${challenge.target}\nRecompensa: ${challenge.points} puntos`
+      );
+    }
+  };
+
+  const filteredBadges = () => {
+    let badges = [...earnedBadges, ...progressBadges, ...lockedBadges];
+    
+    if (searchQuery) {
+      badges = badges.filter(badge => 
+        badge.badge_name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    if (filterType !== 'all') {
+      badges = badges.filter(badge => {
+        if (filterType === 'earned') return badge.earned_at;
+        if (filterType === 'progress') return !badge.earned_at && badge.points_required;
+        if (filterType === 'locked') return !badge.earned_at && !badge.current;
+        return true;
+      });
+    }
+    
+    return badges;
   };
 
   const renderContent = () => {
     if (activeTab === 'badges') {
       return (
         <View>
+          {/* Search and Filter */}
+          <View style={styles.searchFilterContainer}>
+            <View style={styles.searchBar}>
+              <Ionicons name="search" size={20} color={COLORS.lightText} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Buscar insignias..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              {searchQuery !== '' && (
+                <TouchableOpacity onPress={() => setSearchQuery('')}>
+                  <Ionicons name="close-circle" size={20} color={COLORS.lightText} />
+                </TouchableOpacity>
+              )}
+            </View>
+            
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              style={styles.filterScroll}
+            >
+              <TouchableOpacity
+                style={[styles.filterChip, filterType === 'all' && styles.filterChipActive]}
+                onPress={() => setFilterType('all')}
+              >
+                <Text style={[styles.filterChipText, filterType === 'all' && styles.filterChipTextActive]}>
+                  Todas
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.filterChip, filterType === 'earned' && styles.filterChipActive]}
+                onPress={() => setFilterType('earned')}
+              >
+                <Text style={[styles.filterChipText, filterType === 'earned' && styles.filterChipTextActive]}>
+                  Ganadas
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.filterChip, filterType === 'progress' && styles.filterChipActive]}
+                onPress={() => setFilterType('progress')}
+              >
+                <Text style={[styles.filterChipText, filterType === 'progress' && styles.filterChipTextActive]}>
+                  En progreso
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.filterChip, filterType === 'locked' && styles.filterChipActive]}
+                onPress={() => setFilterType('locked')}
+              >
+                <Text style={[styles.filterChipText, filterType === 'locked' && styles.filterChipTextActive]}>
+                  Bloqueadas
+                </Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+
           {/* Earned Badges */}
           {earnedBadges.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>
-                Insignias Ganadas ({earnedBadges.length})
-              </Text>
+              <View style={styles.sectionHeaderRow}>
+                <Text style={styles.sectionTitle}>
+                  Insignias Ganadas ({earnedBadges.length})
+                </Text>
+                <TouchableOpacity onPress={() => handleShareBadge(earnedBadges[0])}>
+                  <Ionicons name="share-social" size={20} color={COLORS.accentBlue} />
+                </TouchableOpacity>
+              </View>
               <View style={styles.badgesGrid}>
                 {earnedBadges.map((badge) => (
                   <EarnedBadge
@@ -436,27 +819,41 @@ export default function Benefits() {
 
     if (activeTab === 'benefits') {
       return (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            Beneficios Activos ({activeBenefits.filter(b => b.is_active).length})
-          </Text>
-          {activeBenefits.length > 0 ? (
-            activeBenefits.map((benefit) => (
-              <BenefitCard
-                key={benefit.id}
-                benefit={benefit}
-                onPress={() => Alert.alert('Beneficio', `Detalles de ${benefit.benefit_type}`)}
-              />
-            ))
-          ) : (
-            <View style={styles.emptyState}>
-              <Ionicons name="gift-outline" size={64} color={COLORS.lightText} />
-              <Text style={styles.emptyText}>No tienes beneficios activos</Text>
-              <Text style={styles.emptySubtext}>
-                Gana badges para desbloquear beneficios exclusivos
-              </Text>
+        <View>
+          {/* Redeem Points Button */}
+          <TouchableOpacity 
+            style={styles.redeemButton}
+            onPress={() => setRedeemModalVisible(true)}
+          >
+            <View style={styles.redeemButtonContent}>
+              <Ionicons name="gift" size={24} color={COLORS.white} />
+              <Text style={styles.redeemButtonText}>Canjear Puntos</Text>
             </View>
-          )}
+            <Ionicons name="chevron-forward" size={24} color={COLORS.white} />
+          </TouchableOpacity>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Beneficios Activos ({activeBenefits.filter(b => b.is_active).length})
+            </Text>
+            {activeBenefits.length > 0 ? (
+              activeBenefits.map((benefit) => (
+                <BenefitCard
+                  key={benefit.id}
+                  benefit={benefit}
+                  onPress={() => Alert.alert('Beneficio', `Detalles de ${benefit.benefit_type}`)}
+                />
+              ))
+            ) : (
+              <View style={styles.emptyState}>
+                <Ionicons name="gift-outline" size={64} color={COLORS.lightText} />
+                <Text style={styles.emptyText}>No tienes beneficios activos</Text>
+                <Text style={styles.emptySubtext}>
+                  Gana badges para desbloquear beneficios exclusivos
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
       );
     }
@@ -486,7 +883,13 @@ export default function Benefits() {
         <PointsHeroCard
           points={userPoints}
           level={level}
-          onPress={() => Alert.alert('Puntos', 'Ver detalles de puntos')}
+          onPress={() => setLevelModalVisible(true)}
+        />
+
+        {/* Daily Challenges */}
+        <DailyChallengesCard 
+          challenges={dailyChallenges}
+          onChallengePress={handleChallengePress}
         />
 
         <TabSelector activeTab={activeTab} onTabChange={setActiveTab} />
@@ -504,6 +907,20 @@ export default function Benefits() {
         visible={modalVisible}
         badge={selectedBadge}
         onClose={() => setModalVisible(false)}
+      />
+
+      <LevelDetailsModal
+        visible={levelModalVisible}
+        level={level}
+        userPoints={userPoints}
+        onClose={() => setLevelModalVisible(false)}
+      />
+
+      <RedeemPointsModal
+        visible={redeemModalVisible}
+        userPoints={userPoints}
+        onClose={() => setRedeemModalVisible(false)}
+        onRedeem={handleRedeemPoints}
       />
     </SafeAreaView>
   );
@@ -815,6 +1232,319 @@ const styles = StyleSheet.create({
   },
   modalCloseButtonText: {
     fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.white,
+  },
+
+  // Search and Filter
+  searchFilterContainer: {
+    backgroundColor: COLORS.white,
+    padding: 16,
+    marginBottom: 8,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.lightGrayBg,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 8,
+    fontSize: 16,
+    color: COLORS.darkText,
+  },
+  filterScroll: {
+    flexDirection: 'row',
+  },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: COLORS.lightGrayBg,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: COLORS.borderGray,
+  },
+  filterChipActive: {
+    backgroundColor: COLORS.primaryBlue,
+    borderColor: COLORS.primaryBlue,
+  },
+  filterChipText: {
+    fontSize: 14,
+    color: COLORS.darkText,
+    fontWeight: '500',
+  },
+  filterChipTextActive: {
+    color: COLORS.white,
+    fontWeight: '600',
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+
+  // Level Details Modal
+  levelModalDescription: {
+    fontSize: 15,
+    color: COLORS.lightText,
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+  levelDetailCard: {
+    backgroundColor: COLORS.lightGrayBg,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: COLORS.borderGray,
+  },
+  levelDetailCardActive: {
+    borderColor: COLORS.primaryBlue,
+    borderWidth: 2,
+    backgroundColor: COLORS.primaryBlue + '05',
+  },
+  levelDetailHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  levelDetailIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  levelDetailInfo: {
+    flex: 1,
+  },
+  levelDetailName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.darkText,
+    marginBottom: 4,
+  },
+  levelDetailRange: {
+    fontSize: 14,
+    color: COLORS.lightText,
+  },
+  currentLevelBadge: {
+    backgroundColor: COLORS.successGreen,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginRight: 8,
+  },
+  currentLevelText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.white,
+  },
+  levelBenefits: {
+    borderTopWidth: 1,
+    borderTopColor: COLORS.borderGray,
+    paddingTop: 12,
+  },
+  levelBenefitsTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.darkText,
+    marginBottom: 8,
+  },
+  levelBenefitItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  levelBenefitText: {
+    fontSize: 14,
+    color: COLORS.darkText,
+    marginLeft: 8,
+  },
+
+  // Redeem Points Modal
+  pointsBalance: {
+    backgroundColor: COLORS.primaryBlue,
+    padding: 20,
+    alignItems: 'center',
+  },
+  pointsBalanceLabel: {
+    fontSize: 14,
+    color: COLORS.white,
+    opacity: 0.9,
+    marginBottom: 8,
+  },
+  pointsBalanceValue: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: COLORS.white,
+  },
+  rewardsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.darkText,
+    marginBottom: 16,
+  },
+  rewardOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.borderGray,
+    marginBottom: 10,
+    backgroundColor: COLORS.white,
+  },
+  rewardOptionSelected: {
+    borderColor: COLORS.primaryBlue,
+    backgroundColor: COLORS.primaryBlue + '05',
+    borderWidth: 2,
+  },
+  rewardOptionDisabled: {
+    opacity: 0.5,
+  },
+  rewardOptionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  rewardOptionDetails: {
+    marginLeft: 12,
+  },
+  rewardOptionName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.darkText,
+    marginBottom: 4,
+  },
+  rewardOptionPoints: {
+    fontSize: 14,
+    color: COLORS.lightText,
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.borderGray,
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: COLORS.borderGray,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.darkText,
+  },
+  confirmButton: {
+    flex: 1,
+    backgroundColor: COLORS.primaryBlue,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  confirmButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.white,
+  },
+
+  // Daily Challenges
+  challengesCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: 16,
+    margin: 16,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: COLORS.borderGray,
+  },
+  challengesHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  challengesTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.darkText,
+  },
+  challengeItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderGray,
+  },
+  challengeIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.primaryBlue + '15',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  challengeDetails: {
+    flex: 1,
+  },
+  challengeName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.darkText,
+    marginBottom: 4,
+  },
+  challengeProgress: {
+    fontSize: 13,
+    color: COLORS.lightText,
+  },
+  challengeReward: {
+    alignItems: 'flex-end',
+  },
+  challengePoints: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.successGreen,
+    marginBottom: 4,
+  },
+
+  // Redeem Button
+  redeemButton: {
+    backgroundColor: COLORS.successGreen,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    margin: 16,
+    marginTop: 0,
+    borderRadius: 16,
+    shadowColor: COLORS.successGreen,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  redeemButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  redeemButtonText: {
+    fontSize: 18,
     fontWeight: 'bold',
     color: COLORS.white,
   },

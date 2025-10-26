@@ -26,7 +26,7 @@ const COLORS = {
 };
 
 // --- 1. Cabecera Superior ---
-const AppHeader = () => (
+const AppHeader = ({ navigation }) => (
   <View style={styles.header}>
     <TouchableOpacity>
       <Feather name="menu" size={24} color={COLORS.primaryBlue} />
@@ -37,7 +37,7 @@ const AppHeader = () => (
       style={styles.logo}
       resizeMode="contain"
     />
-    <TouchableOpacity>
+    <TouchableOpacity onPress={() => navigation.navigate('Más')}>
       <Feather name="user" size={24} color={COLORS.primaryBlue} />
     </TouchableOpacity>
   </View>
@@ -56,53 +56,64 @@ const NotificationBanner = () => (
 );
 
 // --- 3. Barra de Búsqueda y Chat ---
-const SearchAndChat = () => (
+const SearchAndChat = ({ navigation }) => (
   <View style={styles.searchChatContainer}>
-    <View style={styles.searchBar}>
+    <TouchableOpacity 
+      style={styles.searchBar}
+      onPress={() => navigation.navigate('TransactionSearch')}
+    >
       <Ionicons name="search-outline" size={20} color={COLORS.lightText} style={{ marginRight: 10 }} />
-      <TextInput
-        placeholder="What are you looking for?"
-        placeholderTextColor={COLORS.lightText}
-        style={{ flex: 1 }}
-      />
-    </View>
-    <TouchableOpacity style={styles.chatButton}>
+      <Text style={{ flex: 1, color: COLORS.lightText }}>What are you looking for?</Text>
+    </TouchableOpacity>
+    <TouchableOpacity 
+      style={styles.chatButton}
+      onPress={() => navigation.navigate('SupportChat')}
+    >
       <Ionicons name="chatbubble-ellipses" size={24} color={COLORS.white} />
     </TouchableOpacity>
   </View>
 );
 
 // --- 4. Acciones Rápidas ---
-const QuickActions = () => (
+const QuickActions = ({ navigation }) => (
   <View style={styles.quickActionsContainer}>
     <TouchableOpacity style={styles.actionItem}>
       <Ionicons name="add-circle" size={32} color={COLORS.chatBlue} />
     </TouchableOpacity>
     <TouchableOpacity style={styles.actionItem}>
-      <Text style={styles.actionText}>Enviar | Zelle®</Text>
+      <Text style={styles.actionText}>Enviar</Text>
     </TouchableOpacity>
     <TouchableOpacity style={styles.actionItem}>
       <Text style={styles.actionText}>Deposita cheques</Text>
     </TouchableOpacity>
-    <TouchableOpacity style={styles.actionItem}>
+    <TouchableOpacity 
+      style={styles.actionItem}
+      onPress={() => navigation.navigate('Paga y transfiere')}
+    >
       <Text style={styles.actionText}>Paga</Text>
     </TouchableOpacity>
   </View>
 );
 
 // --- 5. Tarjeta de Cuenta Bancaria ---
-const AccountCard = () => (
-  <TouchableOpacity style={styles.cardBlue}>
+const AccountCard = ({ navigation }) => (
+  <TouchableOpacity 
+    style={styles.cardBlue}
+    onPress={() => navigation.navigate('AccountDetail')}
+  >
     <Text style={styles.cardTypeTitle}>Cuentas bancarias (1)</Text>
-    <Text style={styles.cardAccountName}>CHASE COLLEGE (...3882) ›</Text>
+    <Text style={styles.cardAccountName}>CAPITAL ONE COLLEGE (...3882) ›</Text>
     <Text style={styles.balanceBlue}>$1,500.10</Text>
     <Text style={styles.balanceLabelBlue}>Saldo disponible</Text>
   </TouchableOpacity>
 );
 
 // --- 6. Tarjeta de Crédito ---
-const CreditCard = () => (
-  <TouchableOpacity style={styles.cardWhite}>
+const CreditCard = ({ navigation }) => (
+  <TouchableOpacity 
+    style={styles.cardWhite}
+    onPress={() => navigation.navigate('CreditCardDetail')}
+  >
     <Text style={styles.cardTypeTitleDark}>Tarjetas de crédito (1)</Text>
     <Text style={styles.cardAccountNameDark}>Freedom Student (...7081) ›</Text>
     
@@ -125,11 +136,11 @@ const CreditCard = () => (
 );
 
 // --- Componente Principal de la Pantalla ---
-export default function DashboardScreen() {
+export default function DashboardScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
-      <AppHeader />
+      <AppHeader navigation={navigation} />
       
       {/* El ScrollView permite que el contenido del medio sea deslizable */}
       <ScrollView 
@@ -138,8 +149,8 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
       >
         <NotificationBanner />
-        <SearchAndChat />
-        <QuickActions />
+        <SearchAndChat navigation={navigation} />
+        <QuickActions navigation={navigation} />
 
         {/* --- Sección de Cuentas --- */}
         <View style={styles.sectionHeader}>
@@ -149,8 +160,8 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
 
-        <AccountCard />
-        <CreditCard />
+        <AccountCard navigation={navigation} />
+        <CreditCard navigation={navigation} />
 
         {/* Espacio adicional para evitar que el último elemento quede bajo el tab bar */}
         <View style={{ height: 20 }} />
