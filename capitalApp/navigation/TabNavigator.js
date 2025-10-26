@@ -5,9 +5,7 @@ import DashboardScreen from '../screens/DashboardScreen';
 import Benefits from '../screens/Benefits';
 import Profile from '../screens/Profile';
 import PlanMonitoring from '../screens/PlanMonitoring';
-
-// Pantalla temporal para "Paga y transfiere"
-import { View, Text, StyleSheet } from 'react-native';
+import PayAndTransferScreen from '../screens/PayAndTransferScreen';
 
 const COLORS = {
   primaryBlue: '#004a77',
@@ -15,17 +13,6 @@ const COLORS = {
   white: '#ffffff',
   borderGray: '#e0e0e0',
 };
-
-// Pantalla temporal para "Paga y transfiere"
-function PayAndTransferScreen() {
-  return (
-    <View style={styles.tempScreen}>
-      <Ionicons name="swap-horizontal" size={64} color={COLORS.primaryBlue} />
-      <Text style={styles.tempTitle}>Paga y transfiere</Text>
-      <Text style={styles.tempSubtitle}>Esta pantalla estará disponible próximamente</Text>
-    </View>
-  );
-}
 
 const Tab = createBottomTabNavigator();
 
@@ -108,25 +95,3 @@ export default function TabNavigator() {
     </Tab.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  tempScreen: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.white,
-    padding: 24,
-  },
-  tempTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: COLORS.primaryBlue,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  tempSubtitle: {
-    fontSize: 16,
-    color: COLORS.lightText,
-    textAlign: 'center',
-  },
-});
