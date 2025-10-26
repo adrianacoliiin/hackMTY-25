@@ -1,46 +1,21 @@
-import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
+import React, { useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 
+// Mantener el splash nativo visible hasta que hagamos la transición
 SplashScreen.preventAutoHideAsync();
 
 export default function SplashScreenComponent({ navigation }) {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
   useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 5000, // <-- Duración de la animación (5 segundos)
-      useNativeDriver: true,
-    }).start(() => {
-      // Callback: se ejecuta después de que termina la animación
-      setTimeout(async () => {
-        await SplashScreen.hideAsync();
-        navigation.replace('Login');
-      }, 3000); // <-- CAMBIO AQUÍ: Tiempo de espera después de la animación (3 segundos)
-    });
-  }, []);
+    // Esperar 2 segundos mostrando el splash nativo (fondo blanco + flecha roja)
+    const timer = setTimeout(async () => {
+      // Ocultar el splash nativo y navegar directamente a Login
+      await SplashScreen.hideAsync();
+      navigation.replace('Login');
+    }, 2000);
 
-  return (
-    <View style={styles.container}>
-      <Animated.Image
-        source={require('../assets/splash-one.png')}
-        style={[styles.logo, { opacity: fadeAnim }]}
-        resizeMode="contain"
-      />
-    </View>
-  );
+    return () => clearTimeout(timer);
+  }, [navigation]);
+
+  // No renderizamos nada porque el splash nativo se encarga de todo
+  return null;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffffff',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logo: {
-    width: '65%',
-  },
-});
-// 094b77

@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import AppNavigator from './navigation/AppNavigator';
 import * as SystemUI from 'expo-system-ui';
 
-SystemUI.setBackgroundColorAsync('#094b77');
+SystemUI.setBackgroundColorAsync('#004879');
 
 export default function App() {
   return (
